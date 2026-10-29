@@ -62,41 +62,45 @@ def whoseTurn(board):
     return None # return invalid
 
 def checkValid(board):
-    # # 1. Shape
+    
     # if board does not have exactly 4 rows:
     if len(board) != 4:
         return None
     #     return invalid
     for row in range(0,4):# for each row in board:
-        if len(row) != 4:#     if row does not have exactly 4 cells:
-            return None#         return invalid
+        if len(board[row]) != 4:#     if row does not have exactly 4 cells:
+            return None #         return invalid
 
     # # 2. Values
-    # for each row in board:
-    #     for each cell in row:
-    #         if cell is not 0, 1, or 2:
-    #             return invalid
-
+    
+    for row in range(len(board)):
+        for col in range(0,4):
+            if board[row][col] not in (0, 1, 2):
+                return None
+                
+    
     # # 3. Counts
+    
+    turn = whoseTurn(board)
     # turn = whoseTurn(board)
-    # if turn is None:
-    #     return invalid
-
+    if turn == None:
+        return None
+    
     # # 4. Wins
-    # oneWon = hasWon(board, 1)
-    # twoWon = hasWon(board, 2)
+    oneWon = hasWon(board, 1)
+    twoWon = hasWon(board,2)
 
-    # if oneWon and twoWon:
-    #     return invalid
-
+    if oneWon and twoWon:
+        return None
+    
     # # 5. The winner must have moved last
-    # if oneWon and turn is not 2:
-    #     return invalid
-    # if twoWon and turn is not 1:
-    #     return invalid
+    if oneWon and turn != 2:
+        return None
 
-    # return valid
-    pass
+    if twoWon and turn != 1:
+        return None
+
+    return True
 
 #rec mini max function
 def miniMaxRec(board):
@@ -117,10 +121,7 @@ def miniMaxRec(board):
 def miniMaxRecHelper():
     pass
 
-#checking if the board is valid
-def checkValid(board):
-    #copyOfCurrentBoard
-    pass
+
 def main():
 
     #make a board that is 4 by 4 thats a list
