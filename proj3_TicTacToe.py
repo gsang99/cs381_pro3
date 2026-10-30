@@ -1,5 +1,6 @@
 from itertools import permutations
 import time
+import json
 import math
 import copy
 
@@ -216,47 +217,248 @@ def miniMaxMods(board):
             bestMove = (row,col)
     cpuTimer = time.process_time() - startTimer
     return best, bestMove, nodeCounter + 1, cpuTimer
+
+def readBoard():
+    try:
+        board = json.loads(input("Enter in your board:"))
         
+    except json.JSONDecodeError:
+        print("Couldn't read the board")
+        return None
+
+    if not isinstance(board,list):
+        print("That is not a board")
+        return None
+
+    for row in board:
+        if not isinstance(row,list):
+            print("That is not a board")
+            return None
+
+    if not checkValid(board):
+        print("The board given isn't valid")
+        return None
     
+    return board
 
 
+# function readDepth():
+def readDepth():
+    try: 
+        k = int(input("Enter the k depth:"))
+
+    except ValueError:
+        print("K must be a positive integer ")
+        return None
+
+    if k <= 0:
+        print("k must be a positive integer")
+        return None
+
+    return k
+
+
+
+# function printBoard(board):
+def printBoard(board):
+    for row in board:
+        print(*row)
+    print()
+
+
+# function readMove(board):
+def readMove(board):
+    try: 
+        text = input("Enter row and column number:")
+        row, col = text.split(",")
+        row = int(row)
+        col = int(col)
+
+    except ValueError:
+        print("Enter a move like 2,3")
+        return None
+
+    if not (1 <= row <=4 and 1 <= col <= 4):
+        print("Row and column must be between 1 and 4")
+        return None
+    if board[row - 1][col - 1] != 0:
+        print("That cell is taken")
+        return None
+    return (row, col)
+
+# function announceOutcome(board):
+def announceOutcome(board):
+    if hasWon(board, 1):
+        print("Player 1 wins")
+    elif hasWon(board, 2):
+        print("Player 2 wins")
+    else:
+        print("The game is a draw")
+
+# function playGame(board, human, computer, k):
+def playGame(board, human, computer, k):
+    printBoard(board)
+
+    while True:
+        if hasWon(board,1) or hasWon(board, 2) or not findEmptyCells(board):
+            break
+
+        turn = whoseTurn(board)
+
+        if turn == human:
+            move = readMove(board)
+            if move is None:
+                continue
+            row, col = move
+            board[row - 1][col - 1] = human
+        else:
+            value, bestMove, nodes, cpuTime = MinimaxAlphaBetaCutOff(board,k)
+            row, col = bestMove
+            board[row - 1][col - 1] = computer
+            print("Computer plays", bestMove)
+
+        printBoard(board)
+    announceOutcome(board)
 
 
 def main():
 
-    #make a board that is 4 by 4 thats a list
-    board = [[0 for i in range(4)]for j in range(4)]
 
-    #TEST
-    userInput = [[1,1,2,2],[1,2,0,1],[1,0,2,1],[0,1,2,2]]
-
-    #creating a set of 24 lists winning lists
-
-    #giving input to the board
-    board = userInput
-
-    #testing miniMaxMod
-
-    vals = miniMaxMods(board)
-    print(vals)
-
-
-    #option 0: allows user to play with the computer. asks if human
-    #wants to play first.  
+    while True:
+        choice = input('\nPick one of the options below: \n'
+                ' (0) New Game, see board after each play & game outcome\n'
+                ' (1) MiniMax results: value, best move, nodes expanded, and CPU time \n'
+                ' (2) Board value: the best move for root player\n'
+                ' (3) Side by side results of Minimax Cutt Off and MiniMax Alphabeta Cutt Off\n'
+                ' (4) Board at each turn and who wins the game\n'
+                ' (5) Exit\n').strip()
     
-    
-    #user has asked for option 0, ask for their depth of k
-
-    #while the tree hasnt been expanded to depth k 
-        #ask the user to input their next move
-        #start the game by calling MinimaxAlpha BetaCutoff
-        #display the board after each turn is made
         
-        #check if the moves are valid/ if anyone has won
-            #if someone has won, then report the final board output
 
+        if choice == "0":
+            board = [[0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]]
+
+            answer = input("Do you want to play first?: (y/n)")
+            if answer not in ("y", "n"):
+                print("Error try again")
+                continue
+            
+            if answer == "y":
+                human = 1
+                computer = 2
+            else: 
+                human = 2
+                computer = 1
+
+            k = readDepth()
+            if k is not None:
+                playGame(board, human, computer, k)
+        elif choice == "1":
+            
+            answer = readBoard()
+            if answer is None:
+                #go back to the menu
+                continue
+            else:
+                value, bestMove, nodes,cpuTime = miniMaxMods(answer)
+                print("Value:", value)
+                if bestMove is None:
+                    print("Best move: none (the game is over)")
+
+                else:
+                    print("Best move:", bestMove)
+                print("Nodes expanded:", nodes)
+                print("CPU time:", cpuTime)
+        elif choice == "2":
+            board = readBoard()
+
+            if board is not None:
+                k = readDepth()
+                if k is not None:
+                    value, bestMove, nodes, cpuTime = MinimaxAlphaBetaCutOff(board,k)
+                    print("Value:", value )
+                    print("Best move:", bestMove)
+                    print("Nodes expanded:", nodes)
+                    print("CPU time:", cpuTime)
+        
+
+        elif choice == "3":
+            board = readBoard()
+            if board is not None:
+                k = readDepth()
+                if k is not None:
+                    value1, bestMove1, nodes1, time1 = MinimaxCutOff(board,k)
+                    value2, bestMove2, nodes2, time2 = MinimaxAlphaBetaCutOff(board,k)
+                    print("\nMinimax cutoff (k =", k, "):")
+                    print("  Value:", value1)
+                    print("  Best move:", bestMove1 if bestMove1 is not None else "none (the game is over)")
+                    print("  Nodes expanded:", nodes1)
+                    print("  CPU time:", time1)
+
+                    print("\nAlpha-beta cutoff (k =", k, "):")
+                    print("  Value:", value2)
+                    print("  Best move:", bestMove2 if bestMove2 is not None else "none (the game is over)")
+                    print("  Nodes expanded:", nodes2)
+                    print("  CPU time:", time2)
+
+                    if value1 == value2 and bestMove1 == bestMove2:
+                        print("\nBoth searches agree on the value and the best move.")
+                    else:
+                        print("\nWarning: the two searches disagree.")
+        elif choice == "4":
+            board = readBoard()
+            if board is None:
+                continue
+            choice2 = input("Select 1 or 2:")
+            if choice2 not in ("1", "2"):
+                print("Error detected")
+                continue
+            human = int(choice2)
+            computer = 3 - human
+
+            k = readDepth()
+            if k is not None:
+                playGame(board, human, computer, k)
+
+        elif choice == "5":
+            print("Goodbye")
+            break
+        else:
+            print("Thats not a valid option, try again")
+            
+
+
+
+    # #make a board that is 4 by 4 thats a list
+    # board = [[0 for i in range(4)]for j in range(4)]
+
+    # #TEST
+    # userInput = [[1,1,2,2],[1,2,0,1],[1,0,2,1],[0,1,2,2]]
+
+    # #creating a set of 24 lists winning lists
+
+    # #giving input to the board
+    # board = userInput
+
+    # #testing miniMaxMod
+
+    # vals = miniMaxMods(board)
+    # print(vals)
+
+
+    # #option 0: allows user to play with the computer. asks if human
+    # #wants to play first.  
     
-    pass
+    
+    # #user has asked for option 0, ask for their depth of k
+
+    # #while the tree hasnt been expanded to depth k 
+    #     #ask the user to input their next move
+    #     #start the game by calling MinimaxAlpha BetaCutoff
+    #     #display the board after each turn is made
+        
+    #     #check if the moves are valid/ if anyone has won
+    #         #if someone has won, then report the final board output
 
 if __name__ == "__main__":
     main()
