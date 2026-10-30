@@ -6,6 +6,8 @@ import copy
 #Game is tic tac toe, 4x4 board, players take turn placing a 1 or 2 on ea. square
 #player wins by capturing 4 squares, every row and col are used exactly once
 
+nodeCounter = 0
+
 
 def winningSets():
     sets = [] #stores a winning set
@@ -114,7 +116,10 @@ def miniMaxRec(board):
 
     for ea v inside of the Succ(u)
     """
-    
+
+    global nodeCounter 
+    nodeCounter+=1
+
     
     #if player 1 at its current position has won
     if hasWon(board, 1):
@@ -156,7 +161,63 @@ def miniMaxRec(board):
                     best = value
         return best
 
+def miniMaxMods(board):
 
+    #num of nodes expanded
+    global nodeCounter 
+    nodeCounter = 0
+
+    if not checkValid(board):
+        return None
+    #who has won? 
+    #if player 1 at its current position has won
+    if hasWon(board, 1):
+        return 1, None, nodeCounter, 0 #return 1 and stop
+            
+    #if player 2 at its current position has won
+    if hasWon(board,2):
+        return -1, None, nodeCounter, 0
+            # return -1 and stop
+        
+    #if the board is full 
+    if not findEmptyCells(board):
+        return 0, None, nodeCounter, 0
+        
+    
+
+    
+    bestMove = None
+    #best move for curr player
+    currPlayer = whoseTurn(board)
+    
+    #get the empty spaces return
+    empty = findEmptyCells(board)
+
+    if currPlayer == 1:
+        best = float('-inf')
+    
+    if currPlayer == 2:
+        best = float('inf')
+
+    
+    #timer for cput
+    startTimer = time.process_time()
+    for row, col in empty:
+        newBoard = copy.deepcopy(board)
+        newBoard[row - 1][col - 1] = currPlayer
+        value = miniMaxRec(newBoard) 
+
+        #if the currplay has a value that is greater than best, set best to val
+        if currPlayer == 1 and value > best:
+            best = value
+            bestMove = (row,col)
+        if currPlayer == 2 and value < best:
+            best = value
+            bestMove = (row,col)
+    cpuTimer = time.process_time() - startTimer
+    return best, bestMove, nodeCounter + 1, cpuTimer
+        
+    
 
 
 
@@ -167,16 +228,17 @@ def main():
     board = [[0 for i in range(4)]for j in range(4)]
 
     #TEST
-    userInput = [[2,1,0,0], [0,1,0,0], [0,0,0,0], [0,0,2,0]]
+    userInput = [[1,1,2,2],[1,2,0,1],[1,0,2,1],[0,1,2,2]]
 
     #creating a set of 24 lists winning lists
 
     #giving input to the board
     board = userInput
 
-    #printing the winning sets
-    sets = winningSets()
-    print(sets)
+    #testing miniMaxMod
+
+    vals = miniMaxMods(board)
+    print(vals)
 
 
     #option 0: allows user to play with the computer. asks if human
