@@ -1,6 +1,7 @@
 from itertools import permutations
 import time
 import math
+import copy
 
 #Game is tic tac toe, 4x4 board, players take turn placing a 1 or 2 on ea. square
 #player wins by capturing 4 squares, every row and col are used exactly once
@@ -114,12 +115,50 @@ def miniMaxRec(board):
     for ea v inside of the Succ(u)
     """
     
+    
+    #if player 1 at its current position has won
+    if hasWon(board, 1):
+        return 1 #return 1 and stop
+        
+    #if player 2 at its current position has won
+    if hasWon(board,2):
+        return -1
+        # return -1 and stop
+    
+    #if the board is full 
+    if not findEmptyCells(board):
+        return 0
+        #return 0 and stop
 
-    pass
+    else:
+        #otherwise call the miniMax board with its new board, and push
+            #player 1 and player 2 to move to their next best possible moves
+            #on the board
+        player = whoseTurn(board)
+        empty = findEmptyCells(board)
+        
+        if player == 1:
+            best = float('-inf')
 
-#helper function for mini max
-def miniMaxRecHelper():
-    pass
+        if player == 2:
+            best = float('inf')
+
+
+        for row,col in empty:
+            newBoard = copy.deepcopy(board)
+            #put player into the indexes that newBoard has at the row and col num
+            newBoard[row - 1][col - 1] = player
+            value = miniMaxRec(newBoard)
+
+            if player == 1 and value > best:
+                best = value
+            if player == 2 and value < best:
+                    best = value
+        return best
+
+
+
+
 
 
 def main():
