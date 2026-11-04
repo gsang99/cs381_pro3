@@ -326,12 +326,15 @@ def minimaxHelper(board, k, prune):
         return None
     root = whoseTurn(board)
     if hasWon(board, 1) or hasWon(board, 2): #if either player has won
-        return None
+        return 1, None, nodeCounter, 0
+    if hasWon(board, 2):
+        return -1, None, nodeCounter, 0
     if not findEmptyCells(board): #if board is full
         return None
     start = time.process_time()
     best, bestMove = float('-inf'), None
     alpha, beta = float('-inf'), float('inf')
+    root = whoseTurn(board)
     for row, col in findEmptyCells(board):
         newBoard= copy.deepcopy(board)
         newBoard[row - 1][col - 1] = root
@@ -459,7 +462,7 @@ def main():
                 ' (0) New Game, see board after each play & game outcome\n'
                 ' (1) MiniMax results: value, best move, nodes expanded, and CPU time \n'
                 ' (2) Board value: the best move for root player\n'
-                ' (3) Side by side results of Minimax Cutt Off and MiniMax Alphabeta Cutt Off\n'
+                ' (3) Side by side results of Minimax Cut Off and MiniMax Alphabeta Cut Off\n'
                 ' (4) Board at each turn and who wins the game\n'
                 ' (5) Exit\n').strip()
     
